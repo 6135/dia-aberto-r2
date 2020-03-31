@@ -1,0 +1,236 @@
+{% extends 'configuracao/app.html' %}
+{% block content %}
+
+<div class="columns">
+    <div class="column is-3">
+        <form method="POST" action="" id='filter'>
+            {% csrf_token %}
+            <div>
+            <div class="menu">
+                <p class="menu-label">Filtros Dia Aberto</p>
+                <ul class="menu-list">
+                <div class="field">
+                    <!---->
+                    <div class="control has-icons-left is-clearfix">
+                        <input type="number" name="searchAno" placeholder="Ano" class="input" min='{{earliest}}' max='{{latest}}' value="{{current.specific_year}}"> 
+                        <span class="icon is-left">
+                            <i class="mdi mdi-magnify mdi-24px"></i>
+                        </span>
+                    </div>
+                    <!---->
+                </div>
+                <div class="field">
+                    <!---->
+                    <div class="control is-expanded">
+                        <span class="select is-fullwidth is-empty">
+                            {{form.orderBy}}
+                        </span>
+                        <!---->
+                    </div>
+                    <!---->
+                </div>
+                <div class="field">
+                    <!---->
+                    <div class="control is-expanded">
+                        <span class="select is-fullwidth is-empty">
+                            {{form.showBy}}
+                        </span>
+                        <!---->
+                    </div>
+                    <!---->
+                </div>
+                <div class="field">
+                    <button type="submit" onClick="resetForm()" class="button is-danger is-outlined">
+                        <span class="icon is-left">
+                            <i class="mdi mdi-trash-can-outline mdi-24px"></i>
+                        </span>
+                        <span>Limpar pesquisa</span>
+                    </button>
+                    <button type="Submit" class="button is-success is-outlined">
+                        <span class="icon is-left">
+                            <i class="mdi mdi-magnify mdi-24px"></i>
+                        </span>
+                        <span>Pesquisar</span>
+                    </button>
+                </div>
+                </ul>
+            </div>
+            </div>
+            
+        </form>
+    </div>
+    <div class="column">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+              <li><a href="#">Início</a></li>
+              <li class="is-active"><a href="#" aria-current="page">Dias Abertos</a></li>
+            </ul>
+          </nav>
+        <input type="hidden" id="newday-id" name="{% url 'novoDia'%}" value="{{is_open}}">  
+        <a onclick="alert.render('Ainda existe um dia aberto em vigor.\nTem a certeza que deseja criar um novo?')" class="button is-success is-outlined" type="button" style="margin-bottom:0.5rem">
+            <span class="icon is-small">
+                <i class="mdi mdi-plus"></i>
+            </span>
+            <span>Criar novo Dia Aberto</span>
+        </a>
+        <div class="table "></div>
+            <div class="table-wrapper">
+                <table class="table has-mobile-cards is-hoverable is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th width="40px"></th>
+                            <th  style="width: 300px;">
+                                <div class="th-wrap">
+                                    Ano
+ 
+                                </div>
+                            </th>
+                            <th style="width: 300px;">
+                                Dia Inicio
+                            </th>
+                            <th>
+                                Dia Fim
+                            </th>
+                            <th>
+                                Operações
+                            </th>                            
+                        </tr>
+                    </thead>
+                    {% for diaAberto in diaabertos %}
+                    <tbody>      
+                      <tr draggable="false">
+                        <td class="chevron-cell">
+                            <a role="button" onclick="displayDetails({{diaAberto.id}})">
+                                <span class="icon is-expanded">
+                                    <i class="mdi mdi-chevron-right mdi-24px"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td data-label="Ano">{{diaAberto.ano}} </td>
+                        <td data-label="Dia Fim">{{diaAberto.datadiaabertoinicio}}</td>
+                        <td data-label="Estado">{{diaAberto.datadiaabertofim}}</td>
+                        <td data-label="Operações">
+                            <div class="columns">
+                                
+                                <div class="column">  
+                                    <a id='edit' href="{% url 'editarDia' diaAberto.id %}">
+                                        <span class="icon is-small">
+                                            <i class="mdi mdi-circle-edit-outline mdi-24px"></i>
+                                        </span>
+                                    </a>
+                                </div>
+                                <div class="column">    
+                                    <input type="hidden" id="del" name="variable" value="{% url 'eliminarDia' diaAberto.id %}">                 
+                                    <a onclick="alert.render('Tem a certeza que pretende eliminar este Dia Aberto?<br> Atenção, isto irá eliminar todas as atividades e insciçoes associadas!')">
+                                        <span class="icon is-small">
+                                            <i class="mdi mdi-trash-can-outline mdi-24px" style="color: #ff0000"></i>
+                                        </span>
+                                    </a> 
+                                </div>
+                                <div class="column"></div>
+                                <div class="column"></div> 
+                            </div> 
+                        </td>                     
+                      </tr> 
+                      <tr class="detail" style="display: none" id='Details{{diaAberto.id}}'>
+                        <td colspan="5">
+                            <div class="detail-container">
+                                <div class="table"> 
+                                    <div class="table-wrapper">
+                                        <table class="table has-mobile-cards">
+                                            <thead>
+                                                <tr style="border-bottom: 1px solid #ddd">
+                                                    <th class="th-wrap">Inicio submissao Atividades:</th>
+                                                    <th class="th-wrap" style="font-weight: normal;">
+                                                        <span>{{diaAberto.datapropostasatividadesincio}}</span>
+                                                    </th>
+                                                    <!--<th class="th-wrap">Fim submissao Atividades</th>-->
+                                                    <th class="th-wrap">Fim submissao Atividades:</th>
+                                                    <th class="th-wrap" style="font-weight: normal;">
+                                                        <span> {{diaAberto.dataporpostaatividadesfim}} </span>
+                                                    </th>
+                                                </tr>
+                                                <tr style="border-bottom: 1px solid #ddd">
+                                                    <th class="th-wrap">Inicio Inscrições:</th>
+                                                    <th class="th-wrap" style="font-weight: normal;">
+                                                        <span>{{diaAberto.datainscricaoatividadesinicio}}</span>
+                                                    </th>
+                                                    <!--<th class="th-wrap">Fim submissao Atividades</th>-->
+                                                    <th class="th-wrap">Fim Inscrições:</th>
+                                                    <th class="th-wrap" style="font-weight: normal;">
+                                                        <span> {{diaAberto.datainscricaoatividadesfim}} </span>
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="th-wrap">Descrição:</th>
+                                                    <td colspan="4">
+                                                        <textarea class="textarea" disabled style="resize: none;">{{diaAberto.descricao}}</textarea>
+                                                    </td>
+                                                </tr>
+
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                        </td>
+                        
+                      </tr> 
+                    </tbody>
+                    {% endfor %}
+                </table>
+            </div>
+
+    </div>
+</div>
+<div id="msg" class="dialog modal">
+    <div class="modal-background"></div>
+    <div class="modal-card animation-content">
+        <section class="modal-card-body is-titleless" style="border-top-left-radius: 6px; border-top-right-radius: 6px;">
+            <div class="media">
+                <div class="media-content">
+                    <p id='text-00'></p>
+                </div>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button onclick="alert.cancelar()" class="button">Cancelar</button>
+            <button onclick="alert.confirmar()" class="button is-success">Confirmar</button>
+        </footer>
+    </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script>
+var alert = new eliminar();
+function eliminar() {
+    this.render=function(txt){
+        var msg = document.getElementById("msg")
+        document.getElementById('text-00').innerHTML = txt;
+        msg.classList.add("is-active");
+    }
+    this.confirmar=function(){
+        var href = document.getElementById("del").value;
+        window.location.href = href;
+    }
+    this.cancelar=function(){
+        var msg = document.getElementById("msg")
+        msg.classList.remove("is-active");
+    }   
+}
+
+function resetForm(){
+    oFormObject = document.forms['filter'];
+    oFormObject.elements["searchAno"].value = '';
+    oFormObject.elements["orderBy"].value = '';
+    oFormObject.elements["showBy"].value = '';
+}
+
+function displayDetails(idForDetails){
+    var objectDetails = document.getElementById("Details"+idForDetails);
+    if(objectDetails.style.display == 'none') {
+        objectDetails.style.display = "contents";
+    } else objectDetails.style.display = "none";
+}
+</script>
+{% endblock scripts %}
